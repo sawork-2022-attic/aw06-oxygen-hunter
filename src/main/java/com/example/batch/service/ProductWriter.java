@@ -26,7 +26,7 @@ public class ProductWriter implements ItemWriter<Product>, StepExecutionListener
     @Autowired
     public ProductWriter(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("products");
+        this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("products").usingColumns("id","title","category","image");
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -50,7 +50,7 @@ public class ProductWriter implements ItemWriter<Product>, StepExecutionListener
             parameters.put("id", product.getAsin());
             parameters.put("title", product.getTitle());
             parameters.put("category", product.getMain_cat());
-            parameters.put("image", product.getImageURLHighRes().size() > 0? product.getImageURLHighRes().get(0):null);
+            parameters.put("image", product.getImageURLHighRes().size() > 0? product.getImageURLHighRes().get(0):"empty");
             simpleJdbcInsert.execute(parameters);
         }
     }
