@@ -16,8 +16,11 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import javax.sql.DataSource;
 
 
 @Configuration
@@ -34,7 +37,10 @@ public class BatchConfig {
 
     @Bean
     public ItemReader<JsonNode> itemReader() {
-        return new JsonFileReader("/home/java/meta_Clothing_Shoes_and_Jewelry.json");
+        //return new JsonFileReader("/home/java/meta_Clothing_Shoes_and_Jewelry.json");
+        return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
+        //return new JsonFileReader("D:\\CodeRepos\\JavaRepos\\SoftwareArchitecture\\aw06-oxygen-hunter\\src\\main\\resources\\data\\meta_Magazine_Subscriptions_100.json");
+        //return new JsonFileReader(new ClassPathResource("data/meta_Magazine_Subscriptions_100.json").toString());
     }
 
     @Bean
@@ -43,8 +49,8 @@ public class BatchConfig {
     }
 
     @Bean
-    public ItemWriter<Product> itemWriter() {
-        return new ProductWriter();
+    public ItemWriter<Product> itemWriter(DataSource dataSource) {
+        return new ProductWriter(dataSource);
     }
 
     @Bean
@@ -58,10 +64,10 @@ public class BatchConfig {
     }
 
     @Bean
-    public Job chunksJob() {
+    public Job chunksJob(Step step) {
         return jobBuilderFactory
                 .get("chunksJob")
-                .start(processProducts(itemReader(), itemProcessor(), itemWriter()))
+                .start(step)
                 .build();
     }
 

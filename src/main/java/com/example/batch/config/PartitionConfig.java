@@ -25,6 +25,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+import javax.sql.DataSource;
+
 //@Configuration
 //@EnableBatchProcessing
 public class PartitionConfig {
@@ -36,14 +38,14 @@ public class PartitionConfig {
     public StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job partitioningJob() throws Exception {
-        return jobBuilderFactory.get("partitioningJob").incrementer(new RunIdIncrementer()).flow(masterStep()).end()
+    public Job partitioningJob(DataSource dataSource) throws Exception {
+        return jobBuilderFactory.get("partitioningJob").incrementer(new RunIdIncrementer()).flow(masterStep(dataSource)).end()
                 .build();
     }
 
     @Bean
-    public Step masterStep() throws Exception {
-        return stepBuilderFactory.get("masterStep").partitioner(slaveStep()).partitioner("partition", partitioner())
+    public Step masterStep(DataSource dataSource) throws Exception {
+        return stepBuilderFactory.get("masterStep").partitioner(slaveStep(dataSource)).partitioner("partition", partitioner())
                 .gridSize(10).taskExecutor(new SimpleAsyncTaskExecutor()).build();
     }
 
@@ -56,9 +58,9 @@ public class PartitionConfig {
     }
 
     @Bean
-    public Step slaveStep() throws Exception {
+    public Step slaveStep(DataSource dataSource) throws Exception {
         return stepBuilderFactory.get("slaveStep").<JsonNode, Product>chunk(1)
-                .reader(itemReader(null)).processor(itemProcessor()).writer(itemWriter()).build();
+                .reader(itemReader(null)).processor(itemProcessor()).writer(itemWriter(dataSource)).build();
     }
 
     @Bean
@@ -73,8 +75,8 @@ public class PartitionConfig {
     }
 
     @Bean
-    public ItemWriter<Product> itemWriter() {
-        return new ProductWriter();
+    public ItemWriter<Product> itemWriter(DataSource dataSource) {
+        return new ProductWriter(dataSource);
     }
 
 }
