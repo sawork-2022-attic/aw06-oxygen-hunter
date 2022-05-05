@@ -42,8 +42,8 @@ public class BatchConfig {
         //return new JsonFileReader("D:\\CodeRepos\\JavaRepos\\SoftwareArchitecture\\aw06-oxygen-hunter\\src\\main\\resources\\data\\meta_Magazine_Subscriptions_100.json");
         //return new JsonFileReader(new ClassPathResource("data/meta_Magazine_Subscriptions_100.json").toString());
 
-        //return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
-        return new JsonFileReader(this.getClass().getResource("/data/meta_Video_Games2.json").toString());
+        return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
+        //return new JsonFileReader(this.getClass().getResource("/data/meta_Video_Games2.json").toString());
     }
 
     @Bean
