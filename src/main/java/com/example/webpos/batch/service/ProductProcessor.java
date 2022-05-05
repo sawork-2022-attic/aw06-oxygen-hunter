@@ -1,6 +1,6 @@
-package com.example.batch.service;
+package com.example.webpos.batch.service;
 
-import com.example.batch.model.Product;
+import com.example.webpos.batch.model.Product;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.ExitStatus;

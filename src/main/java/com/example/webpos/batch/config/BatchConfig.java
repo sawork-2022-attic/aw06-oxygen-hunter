@@ -1,23 +1,22 @@
-package com.example.batch.config;
+package com.example.webpos.batch.config;
 
-import com.example.batch.model.Product;
-import com.example.batch.service.JsonFileReader;
-import com.example.batch.service.ProductProcessor;
-import com.example.batch.service.ProductWriter;
+import com.example.webpos.batch.model.Product;
+import com.example.webpos.batch.service.JsonFileReader;
+import com.example.webpos.batch.service.ProductProcessor;
+import com.example.webpos.batch.service.ProductWriter;
+import com.example.webpos.model.repository.ProductRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -35,6 +34,8 @@ public class BatchConfig {
     @Autowired
     public StepBuilderFactory stepBuilderFactory;
 
+    @Autowired
+    public ProductRepository repository;
 
     @Bean
     public ItemReader<JsonNode> itemReader() {

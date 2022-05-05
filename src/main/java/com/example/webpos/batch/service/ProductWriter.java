@@ -1,15 +1,13 @@
-package com.example.batch.service;
+package com.example.webpos.batch.service;
 
-import com.example.batch.model.Product;
+import com.example.webpos.batch.model.Product;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.ItemWriter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -19,18 +17,10 @@ import java.util.Map;
 
 public class ProductWriter implements ItemWriter<Product>, StepExecutionListener {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private DataSource dataSource;
-
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    @Autowired
     public ProductWriter(DataSource dataSource) {
-        //this.dataSource = dataSource;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("products").usingColumns("id","title","category","image");
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override

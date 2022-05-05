@@ -1,4 +1,4 @@
-package com.example.batch.model;
+package com.example.webpos.batch.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

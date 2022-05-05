@@ -1,4 +1,4 @@
-package com.example.batch.service;
+package com.example.webpos.batch.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +50,7 @@ public class JsonFileReader implements StepExecutionListener, ItemReader<JsonNod
         }
 
         String line = reader.readLine();
+
 
         if (line != null) {
             //System.out.println(line);
