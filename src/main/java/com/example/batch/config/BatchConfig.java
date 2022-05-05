@@ -10,6 +10,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -38,9 +39,11 @@ public class BatchConfig {
     @Bean
     public ItemReader<JsonNode> itemReader() {
         //return new JsonFileReader("/home/java/meta_Clothing_Shoes_and_Jewelry.json");
-        return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
         //return new JsonFileReader("D:\\CodeRepos\\JavaRepos\\SoftwareArchitecture\\aw06-oxygen-hunter\\src\\main\\resources\\data\\meta_Magazine_Subscriptions_100.json");
         //return new JsonFileReader(new ClassPathResource("data/meta_Magazine_Subscriptions_100.json").toString());
+
+        //return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
+        return new JsonFileReader(this.getClass().getResource("/data/meta_Video_Games2.json").toString());
     }
 
     @Bean
@@ -59,6 +62,7 @@ public class BatchConfig {
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .allowStartIfComplete(true)
                 .taskExecutor(taskExecutor())
                 .build();
     }
