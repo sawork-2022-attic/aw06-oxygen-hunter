@@ -187,19 +187,19 @@
                 <div class="box">
                     <dl class="dlist-align">
                         <dt>Tax:</dt>
-                        <dd class="text-right" data-th-text="'12%'"></dd>
+                        <dd class="text-right" data-th-text="${tax} * 100 + '%'"></dd>
                     </dl>
                     <dl class="dlist-align">
                         <dt>Discount:</dt>
-                        <dd class="text-right" data-th-text="'10%'"><a href="#"></a></dd>
+                        <dd class="text-right" data-th-text="${discount}*100+'%'"><a href="#"></a></dd>
                     </dl>
                     <dl class="dlist-align">
                         <dt>Sub Total:</dt>
-                        <dd class="text-right" data-th-text="'$100'"></dd>
+                        <dd class="text-right" data-th-text="'$'+${subTotal}"></dd>
                     </dl>
                     <dl class="dlist-align">
                         <dt>Total:</dt>
-                        <dd class="text-right h4 b" data-th-text="'$100'"></dd>
+                        <dd class="text-right h4 b" data-th-text="'$'+${total}"></dd>
                     </dl>
                     <div class="row">
                         <div class="col-md-6">
@@ -207,7 +207,7 @@
                                     class="fa fa-times-circle "></i> Cancel </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="#" class="btn  btn-primary btn-lg btn-block"><i class="fa fa-shopping-bag"></i>
+                            <a data-th-href="@{/charge}" class="btn  btn-primary btn-lg btn-block"><i class="fa fa-shopping-bag"></i>
                                 Charge </a>
                         </div>
                     </div>

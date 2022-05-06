@@ -14,17 +14,22 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class PosController {
-    private final PosService cartService;
+
+    private final PosService posService;
 
     @Autowired
-    PosController(PosService cartService) {
-        this.cartService = cartService;
+    PosController(PosService posService) {
+        this.posService = posService;
     }
 
     @ModelAttribute
     public void fillData(Model model) {
-        model.addAttribute("products", cartService.products());
-        model.addAttribute("cart", cartService.content());
+        model.addAttribute("products", posService.products(0));
+        model.addAttribute("cart", posService.content());
+        model.addAttribute("tax", posService.getTax());
+        model.addAttribute("discount", posService.getDiscount());
+        model.addAttribute("subTotal", posService.getSubTotal());
+        model.addAttribute("total", posService.getTotal());
     }
 
     @GetMapping("/")
@@ -36,7 +41,7 @@ public class PosController {
     @GetMapping("/add")
     public String addProduct(@RequestParam("id") String id) {
         try {
-            cartService.addProduct(id, 1);
+            posService.addProduct(id, 1);
         } catch (IllegalArgumentException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -46,7 +51,7 @@ public class PosController {
     @GetMapping("/remove")
     public String removeProduct(@RequestParam("id") String id) {
         try {
-            cartService.removeProduct(id);
+            posService.removeProduct(id);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -54,9 +59,9 @@ public class PosController {
     }
 
     @GetMapping("/sub")
-    public String subProduct(@RequestParam("id") String id){
+    public String subProduct(@RequestParam("id") String id) {
         try {
-            cartService.addProduct(id, -1);
+            posService.addProduct(id, -1);
         } catch (IllegalArgumentException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -64,8 +69,14 @@ public class PosController {
     }
 
     @GetMapping("/empty")
-    public String emptyCart(){
-        cartService.resetCart();
+    public String emptyCart() {
+        posService.resetCart();
+        return "redirect:/";
+    }
+
+    @GetMapping("/charge")
+    public String charge() {
+        posService.charge();
         return "redirect:/";
     }
 }

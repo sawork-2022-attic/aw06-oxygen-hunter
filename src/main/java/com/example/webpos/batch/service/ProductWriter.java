@@ -35,8 +35,7 @@ public class ProductWriter implements ItemWriter<Product>, StepExecutionListener
 
     @Override
     public void write(List<? extends Product> list) throws Exception {
-        //TODO: save to database
-        //list.stream().forEach(System.out::println);
+        //save to database
         System.out.println("chunk written");
         final int columnLength = 255;
         for (Product product : list) {
@@ -45,7 +44,11 @@ public class ProductWriter implements ItemWriter<Product>, StepExecutionListener
             parameters.put("title", product.getTitle().length() < columnLength ? product.getTitle() : product.getTitle().substring(0, columnLength));
             parameters.put("category", product.getMain_cat().length() < columnLength ? product.getMain_cat() : product.getMain_cat().substring(0, columnLength));
             parameters.put("image", product.getImageURLHighRes().size() > 0 ? product.getImageURLHighRes().get(0) : null);
-            simpleJdbcInsert.execute(parameters);
+            try {
+                simpleJdbcInsert.execute(parameters);
+            } catch (Exception e) {
+                //duplicate key during insertion
+            }
         }
     }
 }

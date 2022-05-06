@@ -1,9 +1,9 @@
 package com.example.webpos.batch.config;
 
-import com.example.webpos.batch.model.Product;
 import com.example.webpos.batch.service.JsonFileReader;
 import com.example.webpos.batch.service.ProductProcessor;
 import com.example.webpos.batch.service.ProductWriter;
+import com.example.webpos.batch.model.Product;
 import com.example.webpos.model.repository.ProductRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.batch.core.Job;
@@ -11,78 +11,95 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.partition.support.MultiResourcePartitioner;
+import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 @Configuration
 @EnableBatchProcessing
 public class BatchConfig {
 
-
-    @Autowired
     public JobBuilderFactory jobBuilderFactory;
 
-    @Autowired
     public StepBuilderFactory stepBuilderFactory;
 
-    @Autowired
     public ProductRepository repository;
 
-    @Bean
-    public ItemReader<JsonNode> itemReader() {
-        //return new JsonFileReader("/home/java/meta_Clothing_Shoes_and_Jewelry.json");
-        //return new JsonFileReader("D:\\CodeRepos\\JavaRepos\\SoftwareArchitecture\\aw06-oxygen-hunter\\src\\main\\resources\\data\\meta_Magazine_Subscriptions_100.json");
-        //return new JsonFileReader(new ClassPathResource("data/meta_Magazine_Subscriptions_100.json").toString());
+    public DataSource dataSource;
 
-        return new JsonFileReader(this.getClass().getResource("/data/meta_Magazine_Subscriptions_100.json").toString());
-        //return new JsonFileReader(this.getClass().getResource("/data/meta_Video_Games2.json").toString());
+    @Autowired
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, ProductRepository repository, DataSource dataSource) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
+        this.repository = repository;
+        this.dataSource = dataSource;
     }
 
     @Bean
-    public ItemProcessor<JsonNode, Product> itemProcessor() {
+    public Job partitioningJob() throws IOException {
+        return jobBuilderFactory
+                .get("partitioningJob")
+                .incrementer(new RunIdIncrementer())
+                .start(masterStep())
+                .build();
+    }
+    @Bean
+    public Step masterStep() throws IOException {
+        return stepBuilderFactory
+                .get("masterStep")
+                .partitioner("slaveStep", partitioner())
+                .step(slaveStep())
+                .build();
+    }
+
+    @Bean
+    public Step slaveStep() throws FileNotFoundException {
+        return stepBuilderFactory
+                .get("slaveStep")
+                .<JsonNode, Product>chunk(1000)
+                .reader(itemReader(null))
+                .processor(itemProcessor())
+                .writer(itemWriter())
+                .build();
+    }
+
+    public Partitioner partitioner() throws IOException {
+        MultiResourcePartitioner partitioner = new MultiResourcePartitioner();
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        partitioner.setResources(resolver.getResources("file:src/main/resources/data/*100.json"));
+        return partitioner;
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<JsonNode> itemReader(@Value("#{stepExecutionContext['fileName']}") String filename) {
+        return new JsonFileReader(filename);
+    }
+
+    @Bean
+    public ItemProcessor<JsonNode, Product> itemProcessor(){
         return new ProductProcessor();
     }
 
     @Bean
-    public ItemWriter<Product> itemWriter(DataSource dataSource) {
+    public ItemWriter<Product> itemWriter(){
         return new ProductWriter(dataSource);
-    }
-
-    @Bean
-    protected Step processProducts(ItemReader<JsonNode> reader, ItemProcessor<JsonNode, Product> processor, ItemWriter<Product> writer) {
-        return stepBuilderFactory.get("processProducts").<JsonNode, Product>chunk(20)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
-                .allowStartIfComplete(true)
-                .taskExecutor(taskExecutor())
-                .build();
-    }
-
-    @Bean
-    public Job chunksJob(Step step) {
-        return jobBuilderFactory
-                .get("chunksJob")
-                .start(step)
-                .build();
-    }
-
-    @Bean
-    public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(20);
-        return executor;
     }
 
 }
